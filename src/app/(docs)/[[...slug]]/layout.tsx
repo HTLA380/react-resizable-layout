@@ -11,6 +11,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <p className="text-sm font-medium">
             Made by{" "}
             <a
+              target="_blank"
               href="https://github.com/HTLA380"
               className="text-[rgb(70_66_124)] hover:underline dark:text-[rgb(143_139_180)]">
               Htet Aung Lin
