@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "resizable-layout",
+  "type": "registry:component",
+  "author": "Htet Aung Lin",
+  "title": "Animated, Collapsible, Resizable Component",
+  "description": "Resizable and collapsible layout built with `react-resizable-panels`. Supports smooth animations, prevents layout shifts during server-side rendering, remembers panel sizes using cookies, and stays consistent after refresh.",
+  "dependencies": ["@radix-ui/react-slot", "class-variance-authority", "react-resizable-panels", "lucide-react"],
+  "registryDependencies": ["resizable", "button"],
+  "files": [
+    {
+      "path": "src/components/resizable-layout/constants.ts",
+      "type": "registry:component",
+      "target": "src/components/resizable-layout/constants.ts"
+    },
+    {
+      "path": "src/components/resizable-layout/client-utils.ts",
+      "type": "registry:component",
+      "target": "src/components/resizable-layout/client-utils.ts"
+    },
+    {
+      "path": "src/components/resizable-layout/server-utils.ts",
+      "type": "registry:component",
+      "target": "src/components/resizable-layout/server-utils.ts"
+    },
+    {
+      "path": "src/components/resizable-layout/index.tsx",
+      "type": "registry:component",
+      "target": "src/components/resizable-layout/index.tsx"
+    }
+  ]
+}

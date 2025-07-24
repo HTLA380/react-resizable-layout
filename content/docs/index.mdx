@@ -1,0 +1,425 @@
+---
+title: React Resizable Layout
+description:
+  A resizable and collapsible layout built with `react-resizable-panels`. It offers smooth animations, prevents layout shifts, saves panel sizes
+  to cookies, and stays consistent after refresh.
+full: true
+---
+
+## Key Features
+
+- **SSR-Friendly**: Fetches initial layout state on the server to prevent hydration mismatches.
+- **Persistent State**: Automatically saves panel sizes and visibility to cookies.
+- **Collapsible Panels**: Panels can be toggled open or closed.
+- **Easy Control**: Simple API to control panels from anywhere in the component tree.
+- **Flexible**: Built on `react-resizable-panels`, inheriting its flexibility.
+
+
+## Installation
+
+<UITabs defaultValue="Cli">
+  <UITabsList>
+    <UITabsTrigger value="Cli">Cli</UITabsTrigger>
+    <UITabsTrigger value="Manual">Manual</UITabsTrigger>
+  </UITabsList>
+
+  <UITabsContent value="Cli">
+  <Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
+    <Tab value="pnpm">
+      ```bash
+      pnpm dlx shadcn@latest add https://react-animated-resizable-layout.vercel.app/registry/resizable-layout.json
+      ```
+    </Tab>
+    <Tab value="npm">
+      ```bash
+      npx shadcn@latest add https://react-animated-resizable-layout.vercel.app/registry/resizable-layout.json
+      ```
+    </Tab>
+    <Tab value="yarn">
+      ```bash
+      yarn shadcn@latest add https://react-animated-resizable-layout.vercel.app/registry/resizable-layout.json
+      ```
+    </Tab>
+    <Tab value="bun">
+      ```bash
+      bunx --bun shadcn@latest add https://react-animated-resizable-layout.vercel.app/registry/resizable-layout.json
+      ```
+    </Tab>
+  </Tabs>
+</UITabsContent>
+
+  <UITabsContent value="Manual">
+    <Steps>
+      <Step>
+      Install dependencies
+
+      ```package-install
+      react-resizable-panels
+      ```
+      </Step>
+
+      <Step>
+        Copy and paste the code below into your project.
+
+        ```json doc-gen:file
+          {
+            "file": "./src/components/ui/resizable.tsx",
+            "codeblock": {
+              "lang": "tsx",
+              "meta": "title=\"components/ui/resizable.tsx\""
+            }
+          }
+        ```
+
+        ```json doc-gen:file
+          {
+            "file": "./src/components/resizable-layout/constants.ts",
+            "codeblock": {
+              "lang": "ts",
+              "meta": "title=\"components/resizable-layout/constants.ts\""
+            }
+          }
+        ```
+
+        ```json doc-gen:file
+          {
+            "file": "./src/components/resizable-layout/client-utils.ts",
+            "codeblock": {
+              "lang": "ts",
+              "meta": "title=\"components/resizable-layout/client-utils.ts\""
+            }
+          }
+        ```
+
+        ```json doc-gen:file
+          {
+            "file": "./src/components/resizable-layout/server-utils.ts",
+            "codeblock": {
+              "lang": "ts",
+              "meta": "title=\"components/resizable-layout/server-utils.ts\""
+            }
+          }
+        ```
+
+        ```json doc-gen:file
+          {
+            "file": "./src/components/resizable-layout/index.tsx",
+            "codeblock": {
+              "lang": "tsx",
+              "meta": "title=\"components/resizable-layout/index.tsx\""
+            }
+          }
+        ```
+      </Step>
+
+      <Step>
+        Update the import paths to match your project setup.
+      </Step>
+    </Steps>
+  </UITabsContent>
+</UITabs>
+
+## Usage
+
+```tsx title="example-usage.tsx"
+import {
+  ResizableLayoutContent,
+  ResizableLayoutGroup,
+  ResizableLayoutPanel,
+  ResizableLayoutProvider,
+  ResizableLayoutTrigger,
+} from "@/components/resizable-layout";
+import { getServerSideResizableLayoutCookieData } from "@/components/resizable-layout/server-utils";
+
+/**
+ * Unique panel IDs are used to control the state of individual panels.
+ * These IDs must be consistent between the trigger and the panel components.
+ */
+const LEFT_PANEL_ID = "left-panel";
+const RIGHT_PANEL_ID = "right-panel";
+
+/**
+ * This is an example of a server-side rendered resizable layout.
+ * It fetches cookie data on the server to restore the user's layout preferences.
+ */
+export default async function Usage() {
+  // 1. Read layout cookies on the server.
+  //    - `states`: Stores the collapsed/expanded state of each panel.
+  //    - `sizes`: Stores the width/height of each panel.
+  //    We provide default values to ensure a consistent initial layout
+  //    if no cookie is found or if the cookie data is invalid.
+  const { states: defaultState, sizes: defaultLayout } =
+    await getServerSideResizableLayoutCookieData({
+      states: {
+        [LEFT_PANEL_ID]: true, // Left panel is initially open
+        [RIGHT_PANEL_ID]: false, // Right panel is initially closed
+      },
+      // The `sizes` array corresponds to the panels in order:
+      // [left, content, right]
+      sizes: [25, 75, 0],
+    });
+
+  return (
+    // 2. The provider manages the state of all resizable panels.
+    //    `initialState` is used to set the initial open/closed state of panels.
+    <ResizableLayoutProvider initialState={defaultState}>
+      <ResizableLayoutGroup
+        direction="horizontal"
+        // 3. `defaultLayout` passes the saved (or default) sizes to the panels.
+        //    This prevents layout shifts on page load (FOUC).
+        defaultLayout={defaultLayout}>
+        {/* Left Panel */}
+        <ResizableLayoutPanel
+          id={LEFT_PANEL_ID}
+          side="left"
+          className="group hidden bg-sidebar md:block"
+          minSize={20}
+          // `defaultSize` is a fallback if no cookie/defaultLayout is provided.
+          defaultSize={25}
+          maxSize={30}>
+          <div className="p-4">
+            <h2 className="font-semibold">Left Panel</h2>
+            <p className="text-sm">This is the left panel content.</p>
+          </div>
+        </ResizableLayoutPanel>
+
+        {/* Main Content */}
+        <ResizableLayoutContent minSize={40} defaultSize={75} maxSize={100}>
+          <div className="p-4 flex flex-col items-center gap-4">
+            <h1 className="text-xl font-bold">Main Content</h1>
+            <p>Use the triggers to toggle the side panels.</p>
+            <div className="flex gap-2">
+              <ResizableLayoutTrigger id={LEFT_PANEL_ID} />
+              <ResizableLayoutTrigger id={RIGHT_PANEL_ID} />
+            </div>
+          </div>
+        </ResizableLayoutContent>
+
+        {/* Right Panel */}
+        <ResizableLayoutPanel
+          id={RIGHT_PANEL_ID}
+          side="right"
+          className="group hidden bg-sidebar md:block"
+          minSize={20}
+          defaultSize={25} // This size is applied when the panel is expanded.
+          maxSize={30}>
+          <div className="p-4">
+            <h2 className="font-semibold">Right Panel</h2>
+            <p className="text-sm">This is the right panel content.</p>
+          </div>
+        </ResizableLayoutPanel>
+      </ResizableLayoutGroup>
+    </ResizableLayoutProvider>
+  );
+}
+```
+
+
+## Examples
+
+<Callout type="info">
+  A brief layout shift might occur in the examples below. This is because all example blocks on this page share the same cookie for storing their state. This behavior is specific to the documentation and will not happen in a real-world application.
+</Callout>
+
+### Left Panel
+<BlockViewer name="resizable-layout-01" />
+
+### Right Panel
+<BlockViewer name="resizable-layout-02" />
+
+### Both Panel
+<BlockViewer name="resizable-layout-03" />
+
+### Without Resize Transition
+<BlockViewer name="resizable-layout-04" />
+
+### Collapsible On Resize
+<BlockViewer name="resizable-layout-05" />
+
+### Collapsible Sidebar
+<BlockViewer name="resizable-layout-06" />
+
+## Component Api
+
+Understand the props and capabilities of each component.
+
+#### ResizableLayoutProvider
+
+Manages the shared state for all resizable panels, including their open/closed status. This component must wrap your entire resizable layout.
+
+**Props:**
+
+| Prop         | Type                     | Default | Description                                                                |
+| ------------ | ------------------------ | ------- | -------------------------------------------------------------------------- |
+| initialState | Record\<string, boolean> | `{}`    | The initial state of the panels. Use panel `id` as key with boolean value. |
+
+**Example:**
+
+```tsx
+// Example: Start with the left panel open and the right one closed
+<ResizableLayoutProvider initialState={{ "left-panel": true, "right-panel": false }}>
+  {/* ... */}
+</ResizableLayoutProvider>
+```
+
+---
+
+#### ResizableLayoutGroup
+
+The container for all panels and content. It controls the layout direction and handles saving panel sizes to cookies.
+
+**Props:**
+
+| Prop          | Type                       | Default        | Description                                                                           |
+| ------------- | -------------------------- | -------------- | ------------------------------------------------------------------------------------- |
+| direction     | 'horizontal' \| 'vertical' | `'horizontal'` | The direction of the panel group.                                                     |
+| defaultLayout | number\[]                  |                | Initial sizes of the panels in percentages. Order must match the order of the panels. |
+| ...           | ResizablePanelGroupProps   |                | Accepts all other props from the underlying `ResizablePanelGroup` component.          |
+
+**Example:**
+
+```tsx
+// Corresponds to [left, content, right] panels
+<ResizableLayoutGroup direction="horizontal" defaultLayout={[25, 50, 25]}>
+  <ResizableLayoutPanel id="left-panel" />
+  <ResizableLayoutContent />
+  <ResizableLayoutPanel id="right-panel" />
+</ResizableLayoutGroup>
+```
+
+---
+
+#### ResizableLayoutPanel
+
+A collapsible panel that can be resized. Must be a direct child of `ResizableLayoutGroup`.
+
+**Props:**
+
+| Prop              | Type                | Default | Description                                                               |
+| ----------------- | ------------------- | ------- | ------------------------------------------------------------------------- |
+| id                | string              |         | **Required.** Unique identifier for the panel. Used to link triggers.     |
+| side              | 'left' \| 'right'   |         | **Required.** Position of the panel. Determines where the handle appears. |
+| defaultSize       | number              |         | Initial size in percentage.                                               |
+| minSize           | number              | 20      | Minimum size in percentage.                                               |
+| maxSize           | number              | 30      | Maximum size in percentage.                                               |
+| collapseOnResize  | boolean             | false   | Auto closes if resized below `minSize`.                                   |
+| disableTransition | boolean             | false   | Disable transition animation on resize.                                   |
+| ...               | ResizablePanelProps |         | Accepts all props from the underlying `ResizablePanel` component.         |
+
+---
+
+#### ResizableLayoutContent
+
+Main content area. A flexible panel that takes up the remaining space.
+
+**Props:**
+
+| Prop              | Type                | Default | Description                                                       |
+| ----------------- | ------------------- | ------- | ----------------------------------------------------------------- |
+| defaultSize       | number              | 75      | Default size in percentage.                                       |
+| minSize           | number              | 40      | Minimum size in percentage.                                       |
+| disableTransition | boolean             | false   | Disable transition animation.                                     |
+| ...               | ResizablePanelProps |         | Accepts all props from the underlying `ResizablePanel` component. |
+
+---
+
+#### ResizableLayoutTrigger
+
+A button to toggle a panel’s state (open/close).
+
+**Props:**
+
+| Prop | Type        | Description                                     |
+| ---- | ----------- | ----------------------------------------------- |
+| id   | string      | **Required.** The `id` of the panel to control. |
+| ...  | ButtonProps | All other props from the underlying `Button`.   |
+
+---
+
+#### ResizableLayoutOpen
+
+Headless component providing `onClick` handler to open a panel. (Unstyled by default)
+
+**Props:**
+
+| Prop    | Type    | Default | Description                                                              |
+| ------- | ------- | ------- | ------------------------------------------------------------------------ |
+| id      | string  |         | **Required.** The `id` of the panel to open.                             |
+| asChild | boolean | false   | If `true`, merges props with child instead of rendering its own element. |
+
+**Example:**
+
+```tsx
+<ResizableLayoutOpen id="left-panel" asChild>
+  <button>Open Left Panel</button>
+</ResizableLayoutOpen>
+```
+
+---
+
+#### ResizableLayoutClose 
+
+Headless component providing `onClick` handler to close a panel. (Unstyled by default)
+
+**Props:**
+
+| Prop    | Type    | Default | Description                                                              |
+| ------- | ------- | ------- | ------------------------------------------------------------------------ |
+| id      | string  |         | **Required.** The `id` of the panel to close.                            |
+| asChild | boolean | false   | If `true`, merges props with child instead of rendering its own element. |
+
+---
+
+### Server-Side Utilities
+
+`getServerSideResizableLayoutCookieData`
+
+Server-side utility to read layout data from cookies. Essential for SSR to prevent layout flicker. Call in a Server Component.
+
+**Parameters:**
+
+| Name        | Type                               | Description                                                                            |
+| ----------- | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| defaultData | Partial`<ResizableLayoutCookieData>` | Fallback layout state. Used when no cookie is found. Includes `states` and/or `sizes`. |
+
+**Returns:**
+
+A `Promise<ResizableLayoutCookieData>` containing the layout state from cookie or defaults.
+
+**Example:**
+
+```tsx
+// In a Next.js Server Component (e.g., page.tsx)
+import { getServerSideResizableLayoutCookieData } from "@/components/resizable-layout/server-utils";
+
+export default async function Page() {
+  const { states, sizes } = await getServerSideResizableLayoutCookieData({
+    states: { "left-panel": true },
+    sizes: [25, 75],
+  });
+
+  return (
+    <ResizableLayoutProvider initialState={states}>
+      <ResizableLayoutGroup defaultLayout={sizes}>
+        {/* ... */}
+      </ResizableLayoutGroup>
+    </ResizableLayoutProvider>
+  );
+}
+```
+
+## FAQ & Gotchas
+
+<Callout type="warning" title="Important: Consistent IDs">
+  The`id` prop is the critical link between a `ResizableLayoutPanel` and its control triggers (like `ResizableLayoutTrigger` ). Ensure the `id` is identical for the panel and its corresponding trigger to ensure they work correctly.
+</Callout>
+
+<Accordions className="border-0 bg-transparent mt-6" defaultValue="default-value">
+  <Accordion title="How Default Values Work" id="default-value">
+    The default values provided to `getServerSideResizableLayoutCookieData` are only used when a user visits for the first time or when their cookie data is not available. On subsequent visits, their saved preferences will be applied automatically.
+  </Accordion>
+  <Accordion title="Can I disable the resize animations?" id="animations">
+    Yes. The smooth resizing transition can be disabled by passing the `disableTransition` prop to `ResizableLayoutPanel` or `ResizableLayoutContent`. This can be useful for performance-critical applications or if you prefer instant resizing.
+  </Accordion>
+</Accordions>
+
