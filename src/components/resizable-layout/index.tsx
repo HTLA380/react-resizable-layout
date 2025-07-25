@@ -10,7 +10,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../ui/resi
 import { updateResizableLayoutCookie } from "./client-utils"
 
 /* -------------------------------------------------------------------------- */
-/*                           ResizableLayoutContext                           */
+/*                           ResizableLayoutContext                         z  */
 /* -------------------------------------------------------------------------- */
 
 export type PanelState = {
