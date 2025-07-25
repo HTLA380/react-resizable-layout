@@ -23,17 +23,17 @@
     {
       "path": "src/components/resizable-layout/client-utils.ts",
       "content": "\"use client\"\n\nimport { RESIZABLE_COOKIE_MAX_AGE, RESIZABLE_LAYOUT_COOKIE_NAME, ResizableLayoutCookieData } from \"./constants\"\n\n/**\n * Updates the resizable layout cookie with new panel states or sizes.\n * This function is intended for client-side usage.\n * @param options.panelId The ID of the panel to update its state.\n * @param options.isOpen The new open state for the panel.\n * @param options.sizes The new array of sizes for all panels.\n */\nexport function updateResizableLayoutCookie({\n  panelId,\n  isOpen,\n  sizes,\n}: {\n  panelId?: string\n  isOpen?: boolean\n  sizes?: number[]\n}) {\n  if (typeof document === \"undefined\") {\n    return\n  }\n\n  let currentData: ResizableLayoutCookieData = { states: {}, sizes: [] }\n\n  // Read existing cookie data\n  const cookieString = document.cookie.split(\"; \").find((row) => row.startsWith(`${RESIZABLE_LAYOUT_COOKIE_NAME}=`))\n\n  if (cookieString) {\n    try {\n      const encodedValue = cookieString.split(\"=\")[1]\n      currentData = JSON.parse(decodeURIComponent(encodedValue))\n      // Ensure states and sizes properties exist\n      if (!currentData.states) {\n        currentData.states = {}\n      }\n      if (!currentData.sizes) {\n        currentData.sizes = []\n      }\n    } catch (error) {\n      console.error(\"Failed to parse resizable layout cookie:\", error)\n      // Fallback to default empty data if parsing fails\n      currentData = { states: {}, sizes: [] }\n    }\n  }\n\n  if (panelId !== undefined && isOpen !== undefined) {\n    currentData.states[panelId] = isOpen\n  }\n\n  if (sizes !== undefined) {\n    currentData.sizes = sizes\n  }\n\n  const updatedCookieValue = encodeURIComponent(JSON.stringify(currentData))\n\n  document.cookie = `${RESIZABLE_LAYOUT_COOKIE_NAME}=${updatedCookieValue}; path=/; max-age=${RESIZABLE_COOKIE_MAX_AGE}; SameSite=Lax; Secure`\n}\n",
-      "type": "registry:lib"
+      "type": "registry:component"
     },
     {
       "path": "src/components/resizable-layout/server-utils.ts",
       "content": "\"use server\"\n\nimport { cookies } from \"next/headers\"\nimport { RESIZABLE_LAYOUT_COOKIE_NAME, ResizableLayoutCookieData } from \"./constants\"\n\n/**\n * Reads the resizable layout cookie data from the server-side request headers.\n * This function is intended for server-side usage (e.g., in Next.js Server Components or Route Handlers).\n * @returns The parsed cookie data, or default empty data if not found or invalid.\n */\nexport async function getServerSideResizableLayoutCookieData(\n  defaultData: Partial<ResizableLayoutCookieData> = {},\n): Promise<ResizableLayoutCookieData> {\n  const cookieStore = await cookies()\n  const cookieValue = cookieStore.get(RESIZABLE_LAYOUT_COOKIE_NAME)?.value\n\n  const defaults: ResizableLayoutCookieData = {\n    states: defaultData.states ?? {},\n    sizes: defaultData.sizes ?? [],\n  }\n\n  if (!cookieValue) {\n    return defaults\n  }\n\n  try {\n    const parsedData: ResizableLayoutCookieData = JSON.parse(decodeURIComponent(cookieValue))\n\n    const states = parsedData.states && Object.keys(parsedData.states).length > 0 ? parsedData.states : defaults.states\n    const sizes = parsedData.sizes && parsedData.sizes.length > 0 ? parsedData.sizes : defaults.sizes\n\n    return {\n      states,\n      sizes,\n    }\n  } catch (error) {\n    console.error(\"Failed to parse server-side resizable layout cookie:\", error)\n    return defaults\n  }\n}\n",
-      "type": "registry:lib"
+      "type": "registry:component"
     },
     {
       "path": "src/components/resizable-layout/constants.ts",
       "content": "export const RESIZABLE_LAYOUT_COOKIE_NAME = \"resizable_layout\"\nexport const RESIZABLE_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days\n\nexport interface ResizableLayoutCookieData {\n  states: Record<string, boolean>\n  sizes: number[]\n}\n",
-      "type": "registry:lib"
+      "type": "registry:component"
     }
   ]
 }

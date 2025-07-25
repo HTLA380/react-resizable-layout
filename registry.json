@@ -18,15 +18,15 @@
         },
         {
           "path": "src/components/resizable-layout/client-utils.ts",
-          "type": "registry:lib"
+          "type": "registry:component"
         },
         {
           "path": "src/components/resizable-layout/server-utils.ts",
-          "type": "registry:lib"
+          "type": "registry:component"
         },
         {
           "path": "src/components/resizable-layout/constants.ts",
-          "type": "registry:lib"
+          "type": "registry:component"
         }
       ]
     }
